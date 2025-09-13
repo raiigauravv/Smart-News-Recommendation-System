@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+python-dotenv
+pandas
+numpy
+scikit-learn
+reportlab
+transformers==4.*
+torch     # optional; comment out if you don't want local torch
