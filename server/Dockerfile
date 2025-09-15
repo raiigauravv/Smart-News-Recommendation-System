@@ -1,5 +1,5 @@
 # Multi-stage build for smaller image size (cost optimization)
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 WORKDIR /app
 RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt /app/
