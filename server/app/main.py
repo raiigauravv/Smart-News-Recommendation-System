@@ -26,8 +26,19 @@ def trending(k: int = 20):
 
 @app.post("/recommend", response_model=RecommendResponse)
 def recommend(req: RecommendRequest):
+    """BERT4Rec sequential recommendations (default)"""
     try:
         raw = adapters.recommend(req.user_id, k=req.k, recent_clicks=req.recent_clicks, locale=req.locale)
+        items = [RecItem(**r) for r in raw]
+        return {"user_id": req.user_id, "items": items}
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+@app.post("/recommend/hybrid", response_model=RecommendResponse)
+def recommend_hybrid(req: RecommendRequest):
+    """Hybrid collaborative + content-based recommendations"""
+    try:
+        raw = adapters.recommend_hybrid(req.user_id, k=req.k, recent_clicks=req.recent_clicks, locale=req.locale)
         items = [RecItem(**r) for r in raw]
         return {"user_id": req.user_id, "items": items}
     except Exception as e:

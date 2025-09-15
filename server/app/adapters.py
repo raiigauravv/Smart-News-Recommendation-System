@@ -45,6 +45,22 @@ def recommend(user_id: str, k: int = 10, recent_clicks=None, locale="en") -> Lis
         })
     return result
 
+def recommend_hybrid(user_id: str, k: int = 10, recent_clicks=None, locale="en") -> List[Dict[str, Any]]:
+    ensure_data()
+    # Use traditional hybrid approach (collaborative + content-based)
+    articles = R.hybrid_recommendations(user_id, k)
+    # Convert to the format expected by the API
+    result = []
+    for article in articles:
+        score = article.get('Similarity', 0.6)  # Lower default score for hybrid
+        result.append({
+            "item_id": article.get('NewsID', ''),
+            "score": float(score),
+            "title": article.get('Title', ''),
+            "reason": f"Hybrid: Collaborative + Content filtering in {article.get('Category', 'general')}"
+        })
+    return result
+
 def get_available_categories() -> List[str]:
     """Get list of available news categories"""
     ensure_data()

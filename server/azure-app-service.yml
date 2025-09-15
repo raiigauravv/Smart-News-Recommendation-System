@@ -1,0 +1,25 @@
+# Azure App Service Configuration for Smart News Backend
+# Free F1 tier configuration - $0 cost
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smart-news-backend-config
+data:
+  # App Service Configuration
+  app_service_plan: "smart-news-free-plan"
+  sku: "F1"  # Free tier
+  location: "East US"  # Cheapest region
+  
+  # Runtime Configuration
+  python_version: "3.11"
+  startup_command: "/app/startup.sh"
+  
+  # Environment Variables
+  CORS_ORIGINS: "https://your-frontend-app.azurestaticapps.net"
+  ENV: "production"
+  
+  # Container Configuration
+  docker_registry: "your-acr-name.azurecr.io"
+  image_name: "smart-news-backend"
+  image_tag: "latest"

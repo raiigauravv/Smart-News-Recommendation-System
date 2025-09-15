@@ -96,7 +96,7 @@ export default function Home() {
           <SearchContainer style={{ maxWidth: '600px', margin: '0 auto' }}>
             <div style={{ position: 'relative' }}>
               <SearchInput
-                placeholder="Search for news topics, keywords, or categories (try: sports, health, politics)..."
+                placeholder="Search for news topics, keywords, or categories (try: sports, health, finance)..."
                 value={q}
                 onChange={e => setQ(e.target.value)}
                 onKeyPress={e => e.key === 'Enter' && q.trim() && search.mutate()}
@@ -156,7 +156,7 @@ export default function Home() {
               flexWrap: 'wrap',
               justifyContent: 'center'
             }}>
-              {['sports', 'health', 'politics', 'technology', 'entertainment'].map(tag => (
+              {['sports', 'health', 'finance', 'news', 'entertainment'].map(tag => (
                 <button
                   key={tag}
                   onClick={() => {

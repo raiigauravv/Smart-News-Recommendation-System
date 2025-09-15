@@ -1,0 +1,91 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webAppName": {
+      "type": "string",
+      "defaultValue": "smart-news-backend",
+      "metadata": {
+        "description": "Name of the web app"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources"
+      }
+    }
+  },
+  "variables": {
+    "appServicePlanName": "[concat('plan-', parameters('webAppName'))]",
+    "webAppName": "[parameters('webAppName')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('appServicePlanName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "F1",
+        "tier": "Free",
+        "size": "F1",
+        "family": "F",
+        "capacity": 0
+      },
+      "kind": "linux",
+      "properties": {
+        "perSiteScaling": false,
+        "reserved": true,
+        "targetWorkerCount": 0,
+        "targetWorkerSizeId": 0
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('webAppName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      ],
+      "kind": "app,linux,container",
+      "properties": {
+        "enabled": true,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "reserved": true,
+        "siteConfig": {
+          "numberOfWorkers": 1,
+          "linuxFxVersion": "DOCKER|your-registry/smart-news-backend:latest",
+          "alwaysOn": false,
+          "appSettings": [
+            {
+              "name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+              "value": "false"
+            },
+            {
+              "name": "ENV",
+              "value": "production"
+            },
+            {
+              "name": "PORT",
+              "value": "8000"
+            }
+          ]
+        },
+        "scmSiteAlsoStopped": false,
+        "clientAffinityEnabled": false,
+        "clientCertEnabled": false,
+        "hostNamesDisabled": false,
+        "httpsOnly": true
+      }
+    }
+  ],
+  "outputs": {
+    "webAppUrl": {
+      "type": "string",
+      "value": "[concat('https://', reference(resourceId('Microsoft.Web/sites', variables('webAppName'))).defaultHostName)]"
+    }
+  }
+}

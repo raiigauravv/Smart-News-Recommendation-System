@@ -17,7 +17,7 @@ def load_mind_data():
     """Load MIND dataset with proper error handling"""
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(current_dir)
-    data_dir = os.path.join(project_root, '..', 'archive', 'MINDsmall_train')
+    data_dir = os.path.join(project_root, 'dataset', 'MINDsmall_train')
     
     news_path = os.path.join(data_dir, 'news.tsv')
     behaviors_path = os.path.join(data_dir, 'behaviors.tsv')
@@ -285,15 +285,26 @@ def get_user_recommendations(user_id, method='hybrid', top_k=10):
     else:
         return get_popular_articles(top_k)
 
-def get_article_recommendations(keywords, top_k=10):
-    """Get article recommendations based on keywords"""
+def get_article_recommendations(keywords, top_k=10, category=None):
+    """Get article recommendations based on keywords and optional category"""
     _ensure_data_loaded()
     
-    # Search in titles and abstracts
-    mask = _news_df['Title'].str.contains(keywords, case=False, na=False) | \
-           _news_df['Abstract'].str.contains(keywords, case=False, na=False)
+    # Start with all articles
+    df = _news_df.copy()
     
-    results = _news_df[mask].head(top_k)
+    # Filter by category if specified
+    if category and category.lower() != 'all':
+        category_mask = df['Category'].str.contains(category, case=False, na=False)
+        df = df[category_mask]
+        print(f"Filtering by category '{category}': {len(df)} articles found")
+    
+    # Search in titles and abstracts
+    if keywords and keywords.strip():
+        mask = df['Title'].str.contains(keywords, case=False, na=False) | \
+               df['Abstract'].str.contains(keywords, case=False, na=False)
+        df = df[mask]
+    
+    results = df.head(top_k)
     
     recommendations = []
     for _, article in results.iterrows():
@@ -328,10 +339,31 @@ def get_news_metadata(news_id):
     return None
 
 def get_bert4rec_recommendations(user_id, top_k=10):
-    """BERT4Rec recommendations (fallback to hybrid for now)"""
-    # This would require BERT4Rec implementation, fallback to hybrid
-    print("BERT4Rec not implemented, using hybrid recommendations")
-    return hybrid_recommendations(user_id, top_k)
+    """BERT4Rec recommendations using the real transformer model"""
+    _ensure_data_loaded()
+    
+    try:
+        # Import and use the real BERT4Rec implementation
+        from utils.bert4rec import BERT4RecRecommender
+        
+        print("Using BERT4Rec for sequential recommendations")
+        
+        # Initialize BERT4Rec
+        bert_recommender = BERT4RecRecommender()
+        bert_recommender.load_model()
+        bert_recommender.load_data(_news_df, _behaviors_df)
+        
+        # Get BERT4Rec recommendations
+        recommendations = bert_recommender.recommend_articles_for_user(user_id, top_k)
+        
+        return recommendations
+        
+    except ImportError as e:
+        print(f"BERT4Rec import failed ({str(e)}), falling back to hybrid recommendations")
+        return hybrid_recommendations(user_id, top_k)
+    except Exception as e:
+        print(f"BERT4Rec failed ({str(e)}), falling back to hybrid recommendations")
+        return hybrid_recommendations(user_id, top_k)
 
 def get_trending_articles(top_k=10):
     """Get trending articles (same as popular articles)"""
@@ -367,3 +399,10 @@ user_histories = None
 
 # Create unique_articles_df as a simple variable for compatibility  
 unique_articles_df = None
+
+def get_available_categories():
+    """Get list of available news categories from the dataset"""
+    _ensure_data_loaded()
+    categories = _news_df['Category'].unique().tolist()
+    categories = [cat for cat in categories if pd.notna(cat)]  # Remove NaN values
+    return sorted(categories)
