@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from app import adapters
 from app.schemas import (
@@ -8,6 +9,7 @@ from app.schemas import (
     RecommendResponse,
     SearchQuery,
     SummarizeRequest,
+    ExportPdfRequest,
 )
 from app.settings import settings
 
@@ -36,79 +38,13 @@ def trending(k: int = 20):
 
 @app.post("/recommend", response_model=RecommendResponse)
 def recommend(req: RecommendRequest):
-    """BERT4Rec sequential recommendations (default)"""
+    """Personalized recommendations using existing algorithms"""
     try:
         raw = adapters.recommend(
             req.user_id, k=req.k, recent_clicks=req.recent_clicks, locale=req.locale
         )
         items = [RecItem(**r) for r in raw]
         return {"user_id": req.user_id, "items": items}
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
-
-@app.post("/recommend/hybrid", response_model=RecommendResponse)
-def recommend_hybrid(req: RecommendRequest):
-    """Hybrid collaborative + content-based recommendations"""
-    try:
-        raw = adapters.recommend_hybrid(
-            req.user_id, k=req.k, recent_clicks=req.recent_clicks, locale=req.locale
-        )
-        items = [RecItem(**r) for r in raw]
-        return {"user_id": req.user_id, "items": items}
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
-
-@app.post("/recommend/bert4rec", response_model=RecommendResponse)
-def recommend_bert4rec(req: RecommendRequest):
-    """BERT4Rec sequential recommendations"""
-    try:
-        raw = adapters.recommend(
-            req.user_id, k=req.k, recent_clicks=req.recent_clicks, locale=req.locale
-        )
-        items = [RecItem(**r) for r in raw]
-        return {"user_id": req.user_id, "items": items}
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
-
-@app.post("/recommend/hybrid", response_model=RecommendResponse)
-def recommend_hybrid(req: RecommendRequest):
-    """Hybrid collaborative + content-based recommendations"""
-    try:
-        import os
-        import sys
-
-        from app import adapters
-
-        sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
-        from utils import recommenders as R
-
-        raw = R.get_hybrid_recommendations(req.user_id, req.k)
-        result = []
-        for article in raw:
-            score = article.get("Similarity", 0.5)
-            result.append(
-                {
-                    "item_id": article.get("NewsID", ""),
-                    "score": float(score),
-                    "title": article.get("Title", ""),
-                    "reason": f"Hybrid: Based on your interest in {article.get('Category', 'general')}",
-                }
-            )
-        items = [RecItem(**r) for r in result]
-        return {"user_id": req.user_id, "items": items}
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
-
-@app.get("/categories")
-def get_categories():
-    """Get available news categories"""
-    try:
-        categories = adapters.get_available_categories()
-        return {"categories": categories}
     except Exception as e:
         raise HTTPException(500, str(e))
 
@@ -116,18 +52,16 @@ def get_categories():
 @app.post("/search")
 def search(body: SearchQuery):
     try:
-        items = adapters.keyword_search(body.q, k=body.k, category=body.category)
+        items = adapters.keyword_search(body.q, k=body.k)
         return {"items": items}
     except Exception as e:
         raise HTTPException(500, str(e))
 
 
-@app.post("/summarize")
-def summarize(body: SummarizeRequest):
+@app.post("/export/pdf")
+def export_pdf(body: ExportPdfRequest):
     try:
-        text = adapters.summarize(
-            body.title, body.abstract, max_tokens=body.max_tokens or 128
-        )
-        return {"summary": text}
+        path = adapters.export_pdf([i.model_dump() for i in body.articles])
+        return FileResponse(path, filename="smart_news_report.pdf", media_type="application/pdf")
     except Exception as e:
         raise HTTPException(500, str(e))

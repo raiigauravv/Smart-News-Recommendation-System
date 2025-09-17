@@ -32,3 +32,7 @@ class SummarizeRequest(BaseModel):
     title: Optional[str] = None
     abstract: Optional[str] = None
     max_tokens: Optional[int] = 128
+
+
+class ExportPdfRequest(BaseModel):
+    articles: List[RecItem]  # or a leaner schema; keep keys used in pdf_utils

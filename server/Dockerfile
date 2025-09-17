@@ -2,7 +2,7 @@
 FROM python:3.11-slim AS builder
 WORKDIR /app
 RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
-COPY requirements.txt /app/
+COPY server/requirements.txt /app/
 RUN pip install --no-cache-dir -U pip && pip install --no-cache-dir -r requirements.txt
 
 # Production stage
@@ -14,11 +14,13 @@ COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/pytho
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code
-COPY app /app/app
-COPY ../utils /app/utils
-COPY ../dataset /app/dataset
+COPY server/app /app/app
+COPY server/uvicorn.sh /app/uvicorn.sh
 
-# Create startup script for Azure App Service
+# Copy utils from parent directory (needed for imports)
+COPY utils /app/utils
+
+# Create startup script for Azure App Service (dynamic port)
 RUN echo '#!/bin/bash\nuvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}' > /app/startup.sh
 RUN chmod +x /app/startup.sh
 

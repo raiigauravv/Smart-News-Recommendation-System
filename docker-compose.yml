@@ -5,9 +5,9 @@ services:
     volumes:
       - ./server/app:/app/app
       - ./utils:/app/utils
-      - ./dataset:/app/dataset
     environment:
       - PYTHONUNBUFFERED=1
+    command: ["bash","/app/uvicorn.sh"]
 
   web:
     build:

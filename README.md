@@ -1,103 +1,110 @@
 # Smart News Recommendation System 🗞️
 
-A comprehensive, end-to-end personalized news recommendation system built using the Microsoft MIND dataset. Features multiple recommendation approaches including collaborative filtering, content-based filtering, hybrid models, and advanced BERT4Rec deep learning.
+A comprehensive news recommendation system with FastAPI backend and React frontend, featuring multiple ML algorithms and PDF export functionality.
 
-## 🎯 Features
+## 🚀 How to run locally (two terminals)
 
-- **Multiple Recommendation Engines**:
-  - Collaborative Filtering (SVD-based)
-  - Content-Based Filtering (TF-IDF + Cosine Similarity)
-  - Hybrid Approach (Combining both with tunable weights)
-  - BERT4Rec (Deep Learning Sequential Recommendations)
-  - Keyword Search
-  - Trending Articles
+### Terminal 1 - Backend
+```bash
+cd server
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-- **Interactive Web Interface**:
-  - Streamlit-based user-friendly interface
-  - Dark theme optimized
-  - Multiple browsing modes
-  - PDF and CSV export functionality
-  - AI-powered article summaries
+### Terminal 2 - Frontend  
+```bash
+cd web
+npm install
+npm run dev
+```
 
-- **Advanced Features**:
-  - Real-time recommendations
-  - User behavior analysis
-  - Category preference learning
-  - Trending content detection
-  - Comprehensive evaluation metrics
+Visit: http://localhost:5173 (frontend) and http://localhost:8000/docs (API docs)
+
+## 🐳 How to run with Docker Compose
+
+```bash
+docker compose up --build
+```
+
+Visit: http://localhost:5173 (frontend) and http://localhost:8000 (API)
+
+## 📡 API endpoints
+
+- `GET /health` - Health check
+- `GET /trending?k={number}` - Get trending articles  
+- `POST /recommend` - Get personalized recommendations
+- `POST /search` - Keyword search articles
+- `POST /export/pdf` - Export articles to PDF
+
+## ⚙️ Frontend .env.local note
+
+Create `web/.env.local` with:
+```
+VITE_API_URL=http://localhost:8000
+```
 
 ## 📁 Project Structure
 
 ```
-Smart-News-Recommendation-System/
-├── main.py                 # Streamlit web application
-├── mind-ds.ipynb          # Comprehensive analysis notebook
-├── utils/
-│   ├── recommenders.py    # Core recommendation algorithms
-│   └── pdf_utils.py       # PDF generation utilities
-├── archive/
-│   └── MINDsmall_train/   # MIND dataset
-│       ├── news.tsv       # News articles metadata
-│       ├── behaviors.tsv  # User interaction data
-│       ├── entity_embedding.vec
-│       └── relation_embedding.vec
-├── temp/                  # Generated reports (auto-created)
-├── requirements.txt       # Python dependencies
-├── .env                   # Environment configuration
-└── README.md             # This file
+repo-root/
+├─ server/            # FastAPI backend
+├─ web/               # React (Vite + TS) frontend  
+├─ utils/             # Business logic (recommendation algorithms)
+├─ docker-compose.yml # One-command development
+└─ README.md          # This file
 ```
 
-## 🚀 Quick Start
+## 🧪 Running Tests
 
-### Prerequisites
+```bash
+cd server
+source .venv/bin/activate
+pip install -r requirements.txt pytest
+pytest -q
+```
 
-- Python 3.8 or higher
-- 8GB+ RAM (for processing large dataset)
-- 2GB+ free disk space
+## 📊 Features
 
-### Installation
+- **Multiple Recommendation Engines**: Collaborative filtering, content-based, hybrid approaches
+- **Real-time API**: FastAPI with automatic OpenAPI documentation
+- **Modern Frontend**: React with TypeScript and Vite
+- **PDF Export**: Download recommendations as formatted PDF reports
+- **Docker Support**: One-command development environment
 
-1. **Clone or navigate to the project directory**
+## ☁️ Azure Deployment
 
-   ```bash
-   cd Smart-News-Recommendation-System-main
-   ```
+### What to deploy
+- Deploy only the **backend** to Azure App Service using ACR (small Python slim image)
+- Deploy **frontend** to Azure Static Web Apps or Vercel/Netlify (free)
+- Point VITE_API_URL to the App Service URL
 
-2. **Install dependencies**
+### Backend commands (once)
+```bash
+# login
+az login
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+# create RG
+az group create -n snr-rg -l canadacentral
 
-3. **Download NLTK data (first time only)**
+# create ACR (Basic)
+az acr create -g snr-rg -n snracr --sku Basic
 
-   ```python
-   import nltk
-   nltk.download('stopwords')
-   ```
+# app service plan + webapp (container)
+az appservice plan create -g snr-rg -n snr-asp --is-linux --sku B1
+az webapp create -g snr-rg -p snr-asp -n snr-api --deployment-container-image-name mcr.microsoft.com/azure-app-service/samples/aspnethelloworld:latest
+```
 
-4. **Run the application**
+### GitHub secrets (repo → Settings → Secrets and variables → Actions)
+- `AZURE_CREDENTIALS` (output from `az ad sp create-for-rbac --name snr-sp --sdk-auth --role contributor --scopes /subscriptions/<SUB_ID>/resourceGroups/snr-rg`)
+- `AZURE_WEBAPP_NAME = snr-api`
+- `AZURE_RG = snr-rg`
+- `AZURE_ACR_NAME = snracr`
 
-   ```bash
-   streamlit run main.py
-   ```
-
-5. **Open your browser** and go to `http://localhost:8501`
-
-## 🔧 Configuration
-
-### Environment Variables (.env)
-
-- `NEWS_DATA_PATH`: Path to news.tsv file
-- `BEHAVIORS_DATA_PATH`: Path to behaviors.tsv file
-- `TFIDF_MAX_FEATURES`: Maximum features for TF-IDF (default: 5000)
-- `SVD_LATENT_FACTORS`: SVD components (default: 100)
-- `HYBRID_ALPHA_DEFAULT`: Default hybrid mixing parameter (default: 0.0)
-
-### Model Parameters
-
-- **Alpha Parameter**: Controls hybrid recommendation mixing
-  - 0.0 = Pure collaborative filtering
+### Why this saves space
+- Python slim base, no transformers/torch
+- Static frontend hosted elsewhere (no App Service disk usage)
+- No dataset baked into the image; your utils load minimal data at runtime
   - 1.0 = Pure content-based filtering
   - 0.5 = Balanced hybrid approach
 

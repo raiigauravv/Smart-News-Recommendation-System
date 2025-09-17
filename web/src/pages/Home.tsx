@@ -3,6 +3,7 @@ import {
   fetchTrending,
   postSearch,
   fetchCategories,
+  postExportPdf,
   type RecItem,
 } from '../lib/api';
 import ArticleCard from '../components/ArticleCard';
@@ -45,6 +46,18 @@ export default function Home() {
     mutationFn: () => postSearch(q, 20, selectedCategory || undefined),
     onSuccess: () => setQ(''),
   });
+
+  async function exportCurrent(items: RecItem[]) {
+    const blob = await postExportPdf(items);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "smart_news_report.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
 
   const items: RecItem[] = search.data ?? trending ?? [];
   const isSearchActive = search.data !== undefined;
@@ -249,6 +262,27 @@ export default function Home() {
               )}
             </SearchButton>
           </SearchContainer>
+
+          <button
+            className="px-4 py-2 rounded-xl border"
+            onClick={() => exportCurrent(items ?? [])}
+            style={{
+              marginTop: '1rem',
+              backgroundColor: 'transparent',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              color: 'white',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            Export PDF
+          </button>
         </FormContainer>
       </GlassCard>
 

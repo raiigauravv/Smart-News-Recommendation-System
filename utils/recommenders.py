@@ -406,3 +406,164 @@ def get_available_categories():
     categories = _news_df['Category'].unique().tolist()
     categories = [cat for cat in categories if pd.notna(cat)]  # Remove NaN values
     return sorted(categories)
+
+# ---- Thin helper API for FastAPI layer ----
+
+def load_mind_data():
+    """Idempotent lazy-load (no-op if already loaded). Make sure your existing loader is called here."""
+    global _news_df, _behaviors_df, _is_data_loaded
+    if not _is_data_loaded:
+        _ensure_data_loaded()
+    return True
+
+def get_trending_articles(k: int = 20):
+    """Return top-k trending articles.
+    MUST return: list[dict] with keys: item_id (str), score (float), title (str|opt), reason (str|opt)."""
+    load_mind_data()
+    # Get articles with most impressions/interactions as trending
+    trending_articles = []
+    
+    # Count article impressions from behaviors data
+    article_counts = {}
+    for _, row in _behaviors_df.iterrows():
+        impressions = parse_impressions(row['Impressions'])
+        for news_id, label in impressions:
+            if news_id not in article_counts:
+                article_counts[news_id] = 0
+            article_counts[news_id] += 1
+    
+    # Sort by count and get top k
+    sorted_articles = sorted(article_counts.items(), key=lambda x: x[1], reverse=True)[:k]
+    
+    for news_id, count in sorted_articles:
+        # Get article details from news_df
+        article_info = _news_df[_news_df['NewsID'] == news_id]
+        if not article_info.empty:
+            title = article_info.iloc[0]['Title'] if pd.notna(article_info.iloc[0]['Title']) else f"Article {news_id}"
+            trending_articles.append({
+                "item_id": news_id,
+                "score": float(count),
+                "title": title,
+                "reason": "Trending"
+            })
+    
+    # Fill with random articles if not enough trending
+    if len(trending_articles) < k:
+        remaining = k - len(trending_articles)
+        random_articles = _news_df.sample(n=min(remaining, len(_news_df)))
+        for _, article in random_articles.iterrows():
+            if article['NewsID'] not in [item['item_id'] for item in trending_articles]:
+                trending_articles.append({
+                    "item_id": article['NewsID'],
+                    "score": 1.0,
+                    "title": article['Title'] if pd.notna(article['Title']) else f"Article {article['NewsID']}",
+                    "reason": "Popular"
+                })
+    
+    return trending_articles[:k]
+
+def recommend_for_user(user_id: str, k: int = 10, recent_clicks=None, locale: str = "en"):
+    """Return top-k personalized recommendations for user_id.
+    MUST return: list[dict] with keys: item_id, score, title|opt, reason|opt."""
+    load_mind_data()
+    
+    try:
+        # Try to use existing collaborative filtering
+        recs = collaborative_filtering_recommendations(user_id, top_k=k)
+        results = []
+        
+        for news_id, score in recs:
+            article_info = _news_df[_news_df['NewsID'] == news_id]
+            if not article_info.empty:
+                title = article_info.iloc[0]['Title'] if pd.notna(article_info.iloc[0]['Title']) else f"Article {news_id}"
+                results.append({
+                    "item_id": news_id,
+                    "score": float(score),
+                    "title": title,
+                    "reason": f"Based on your reading history"
+                })
+        
+        if len(results) >= k:
+            return results[:k]
+            
+    except Exception as e:
+        print(f"CF recommendation failed: {e}")
+    
+    # Fallback to content-based or trending
+    try:
+        # Get user's reading history for content-based recommendations
+        user_history = []
+        user_rows = _behaviors_df[_behaviors_df['UserID'] == user_id]
+        for _, row in user_rows.iterrows():
+            history = parse_history(row['History'])
+            user_history.extend(history)
+        
+        if user_history:
+            # Use content-based recommendations
+            content_recs = content_based_recommendations(user_history, top_k=k)
+            results = []
+            for news_id, score in content_recs:
+                article_info = _news_df[_news_df['NewsID'] == news_id]
+                if not article_info.empty:
+                    title = article_info.iloc[0]['Title'] if pd.notna(article_info.iloc[0]['Title']) else f"Article {news_id}"
+                    results.append({
+                        "item_id": news_id,
+                        "score": float(score),
+                        "title": title,
+                        "reason": "Similar to your interests"
+                    })
+            return results[:k]
+    except Exception as e:
+        print(f"Content-based recommendation failed: {e}")
+    
+    # Final fallback to trending
+    return get_trending_articles(k=k)
+
+def search_by_keywords(q: str, k: int = 20):
+    """Keyword search using your TF-IDF or content-based search.
+    MUST return: list[dict] with keys: item_id, score, title|opt, reason|opt."""
+    load_mind_data()
+    
+    try:
+        # Use existing keyword search functionality
+        article_results = get_article_recommendations(q, top_k=k)
+        formatted_results = []
+        
+        for _, article in article_results.iterrows():
+            formatted_results.append({
+                "item_id": article['NewsID'],
+                "score": 1.0,  # get_article_recommendations doesn't return scores
+                "title": article['Title'] if pd.notna(article['Title']) else f"Article {article['NewsID']}",
+                "reason": "Keyword match"
+            })
+        
+        return formatted_results[:k]
+        
+    except Exception as e:
+        print(f"Keyword search failed: {e}")
+        # Fallback to simple title/abstract search
+        query_lower = q.lower()
+        matches = []
+        
+        for _, article in _news_df.iterrows():
+            score = 0.0
+            title = article['Title'] if pd.notna(article['Title']) else ""
+            abstract = article['Abstract'] if pd.notna(article['Abstract']) else ""
+            
+            # Simple keyword matching
+            if query_lower in title.lower():
+                score += 2.0
+            if query_lower in abstract.lower():
+                score += 1.0
+            
+            if score > 0:
+                matches.append({
+                    "item_id": article['NewsID'],
+                    "score": score,
+                    "title": title or f"Article {article['NewsID']}",
+                    "reason": "Keyword match"
+                })
+        
+        # Sort by score and return top k
+        matches.sort(key=lambda x: x['score'], reverse=True)
+        return matches[:k]
