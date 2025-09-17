@@ -1,5 +1,7 @@
-from pydantic import BaseModel
 from typing import List, Optional
+
+from pydantic import BaseModel
+
 
 class RecommendRequest(BaseModel):
     user_id: str
@@ -7,20 +9,24 @@ class RecommendRequest(BaseModel):
     recent_clicks: Optional[List[str]] = None
     locale: Optional[str] = "en"
 
+
 class RecItem(BaseModel):
     item_id: str
     score: float
     title: Optional[str] = None
     reason: Optional[str] = None
 
+
 class RecommendResponse(BaseModel):
     user_id: str
     items: List[RecItem]
+
 
 class SearchQuery(BaseModel):
     q: str
     k: Optional[int] = 20
     category: Optional[str] = None  # New: category filter
+
 
 class SummarizeRequest(BaseModel):
     title: Optional[str] = None

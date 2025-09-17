@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { postRecommend, postRecommendHybrid, type RecItem } from "../lib/api";
-import ArticleCard from "../components/ArticleCard";
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { postRecommend, postRecommendHybrid, type RecItem } from '../lib/api';
+import ArticleCard from '../components/ArticleCard';
 import { motion } from 'framer-motion';
 import { FiUser, FiSettings, FiStar, FiList } from 'react-icons/fi';
 import {
@@ -16,7 +16,7 @@ import {
   EmptyStateMessage,
   SectionHeader,
   SectionTitle,
-  SectionSubtitle
+  SectionSubtitle,
 } from '../components/ui/StyledComponents';
 import styled from 'styled-components';
 
@@ -55,11 +55,11 @@ const Input = styled(motion.input)`
   color: white;
   font-size: 1rem;
   font-weight: 500;
-  
+
   &::placeholder {
     color: rgba(255, 255, 255, 0.6);
   }
-  
+
   &:focus {
     outline: none;
     border-color: rgba(255, 255, 255, 0.5);
@@ -78,7 +78,7 @@ const Select = styled.select`
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  
+
   &:focus {
     outline: none;
     border-color: rgba(255, 255, 255, 0.5);
@@ -97,7 +97,7 @@ const ResultsHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-bottom: 2rem;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: flex-start;
@@ -116,20 +116,22 @@ const Badge = styled.span`
 `;
 
 export default function Recommend() {
-  const [userId, setUserId] = useState("U13740");
+  const [userId, setUserId] = useState('U13740');
   const [numRecs, setNumRecs] = useState(10);
-  const [selectedModel, setSelectedModel] = useState<'bert4rec' | 'hybrid'>('bert4rec');
-  
-  const rec = useMutation({ 
+  const [selectedModel, setSelectedModel] = useState<'bert4rec' | 'hybrid'>(
+    'bert4rec'
+  );
+
+  const rec = useMutation({
     mutationFn: () => {
       if (selectedModel === 'hybrid') {
-        return postRecommendHybrid(userId, numRecs, ["n101", "n205"]);
+        return postRecommendHybrid(userId, numRecs, ['n101', 'n205']);
       } else {
-        return postRecommend(userId, numRecs, ["n101", "n205"]);
+        return postRecommend(userId, numRecs, ['n101', 'n205']);
       }
-    }
+    },
   });
-  
+
   const items: RecItem[] = rec.data ?? [];
 
   const containerVariants = {
@@ -138,19 +140,32 @@ export default function Recommend() {
       opacity: 1,
       transition: {
         staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
+        delayChildren: 0.2,
+      },
+    },
   };
 
   const LoadingSkeleton = () => (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem', padding: '2rem' }}>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+        gap: '2rem',
+        padding: '2rem',
+      }}
+    >
       {[...Array(numRecs)].map((_, index) => (
         <LoadingCard key={index}>
           <div style={{ padding: '1.5rem' }}>
-            <LoadingTextPlaceholder style={{ height: '1rem', width: '25%', marginBottom: '1rem' }} />
-            <LoadingTextPlaceholder style={{ height: '1.5rem', marginBottom: '1rem' }} />
-            <LoadingTextPlaceholder style={{ height: '1rem', marginBottom: '0.5rem' }} />
+            <LoadingTextPlaceholder
+              style={{ height: '1rem', width: '25%', marginBottom: '1rem' }}
+            />
+            <LoadingTextPlaceholder
+              style={{ height: '1.5rem', marginBottom: '1rem' }}
+            />
+            <LoadingTextPlaceholder
+              style={{ height: '1rem', marginBottom: '0.5rem' }}
+            />
             <LoadingTextPlaceholder style={{ height: '1rem', width: '60%' }} />
           </div>
         </LoadingCard>
@@ -159,16 +174,12 @@ export default function Recommend() {
   );
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <motion.div variants={containerVariants} initial="hidden" animate="visible">
       {/* Header */}
       <GlassCard
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
       >
         <FormContainer style={{ textAlign: 'center', padding: '2rem' }}>
           <SectionHeader>
@@ -187,17 +198,23 @@ export default function Recommend() {
       <GlassCard
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+        transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
         style={{ marginTop: '2rem' }}
       >
         <FormContainer>
           <SectionHeader style={{ marginBottom: '2rem' }}>
-            <SectionTitle style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center' }}>
+            <SectionTitle
+              style={{
+                fontSize: '1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
               <FiSettings style={{ marginRight: '0.5rem' }} />
               Recommendation Settings
             </SectionTitle>
           </SectionHeader>
-          
+
           <FormGrid>
             {/* User ID Input */}
             <FormGroup>
@@ -243,16 +260,26 @@ export default function Recommend() {
               <Select
                 id="modelType"
                 value={selectedModel}
-                onChange={e => setSelectedModel(e.target.value as 'bert4rec' | 'hybrid')}
+                onChange={e =>
+                  setSelectedModel(e.target.value as 'bert4rec' | 'hybrid')
+                }
               >
                 <option value="bert4rec">🤖 BERT4Rec (Transformer)</option>
-                <option value="hybrid">🔄 Hybrid (Collaborative + Content)</option>
+                <option value="hybrid">
+                  🔄 Hybrid (Collaborative + Content)
+                </option>
               </Select>
             </FormGroup>
           </FormGrid>
 
           {/* Generate Button */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginTop: '2rem',
+            }}
+          >
             <SearchButton
               onClick={() => rec.mutate()}
               disabled={!userId.trim() || rec.isPending}
@@ -264,7 +291,11 @@ export default function Recommend() {
                 <>
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: 'linear',
+                    }}
                     style={{ display: 'inline-block', marginRight: '0.5rem' }}
                   >
                     ⟳
@@ -272,9 +303,7 @@ export default function Recommend() {
                   Generating Recommendations...
                 </>
               ) : (
-                <>
-                  ✨ Get My Recommendations
-                </>
+                <>✨ Get My Recommendations</>
               )}
             </SearchButton>
           </div>
@@ -292,37 +321,45 @@ export default function Recommend() {
         <GlassCard
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
           style={{ marginTop: '2rem' }}
         >
           <FormContainer>
             <ResultsHeader>
               <SectionHeader style={{ textAlign: 'left', margin: 0 }}>
-                <SectionTitle style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
+                <SectionTitle
+                  style={{ fontSize: '2rem', marginBottom: '0.5rem' }}
+                >
                   Recommendations for {userId}
                 </SectionTitle>
-                <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1rem', margin: 0 }}>
-                  {selectedModel === 'bert4rec' ? '🤖 Generated by BERT4Rec Transformer' : '🔄 Generated by Hybrid Model'}
+                <p
+                  style={{
+                    color: 'rgba(255,255,255,0.8)',
+                    fontSize: '1rem',
+                    margin: 0,
+                  }}
+                >
+                  {selectedModel === 'bert4rec'
+                    ? '🤖 Generated by BERT4Rec Transformer'
+                    : '🔄 Generated by Hybrid Model'}
                 </p>
               </SectionHeader>
-              <Badge>
-                {items.length} articles
-              </Badge>
+              <Badge>{items.length} articles</Badge>
             </ResultsHeader>
-            
-            <motion.div 
-              style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', 
+
+            <motion.div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
                 gap: '2rem',
-                padding: '1rem'
+                padding: '1rem',
               }}
               variants={containerVariants}
               initial="hidden"
               animate="visible"
             >
               {items.map((item, idx) => (
-                <motion.div 
+                <motion.div
                   key={`${item.item_id}-${idx}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -340,21 +377,22 @@ export default function Recommend() {
         <GlassCard style={{ marginTop: '2rem' }}>
           <EmptyStateContainer>
             <EmptyStateIcon
-              animate={{ 
+              animate={{
                 scale: [1, 1.1, 1],
-                rotate: [0, 5, -5, 0]
+                rotate: [0, 5, -5, 0],
               }}
-              transition={{ 
+              transition={{
                 duration: 2,
                 repeat: Infinity,
-                ease: "easeInOut"
+                ease: 'easeInOut',
               }}
             >
               🤖
             </EmptyStateIcon>
             <EmptyStateTitle>No recommendations found</EmptyStateTitle>
             <EmptyStateMessage>
-              Try a different user ID or check if the user has interaction history.
+              Try a different user ID or check if the user has interaction
+              history.
             </EmptyStateMessage>
           </EmptyStateContainer>
         </GlassCard>

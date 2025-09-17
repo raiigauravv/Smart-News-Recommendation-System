@@ -49,6 +49,12 @@ temp/
 *.tmp
 *.log
 
+# Azure artifacts (should not be tracked)
+LogFiles/
+deployments/
+logs.zip
+*.kudu
+
 # OS generated files
 .DS_Store
 .DS_Store?

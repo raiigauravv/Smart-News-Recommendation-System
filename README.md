@@ -50,6 +50,7 @@ Smart-News-Recommendation-System/
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Python 3.8 or higher
 - 8GB+ RAM (for processing large dataset)
 - 2GB+ free disk space
@@ -57,22 +58,26 @@ Smart-News-Recommendation-System/
 ### Installation
 
 1. **Clone or navigate to the project directory**
+
    ```bash
    cd Smart-News-Recommendation-System-main
    ```
 
 2. **Install dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. **Download NLTK data (first time only)**
+
    ```python
    import nltk
    nltk.download('stopwords')
    ```
 
 4. **Run the application**
+
    ```bash
    streamlit run main.py
    ```
@@ -82,6 +87,7 @@ Smart-News-Recommendation-System/
 ## 🔧 Configuration
 
 ### Environment Variables (.env)
+
 - `NEWS_DATA_PATH`: Path to news.tsv file
 - `BEHAVIORS_DATA_PATH`: Path to behaviors.tsv file
 - `TFIDF_MAX_FEATURES`: Maximum features for TF-IDF (default: 5000)
@@ -89,6 +95,7 @@ Smart-News-Recommendation-System/
 - `HYBRID_ALPHA_DEFAULT`: Default hybrid mixing parameter (default: 0.0)
 
 ### Model Parameters
+
 - **Alpha Parameter**: Controls hybrid recommendation mixing
   - 0.0 = Pure collaborative filtering
   - 1.0 = Pure content-based filtering
@@ -97,12 +104,14 @@ Smart-News-Recommendation-System/
 ## 📊 Dataset Information
 
 ### MIND Dataset (Microsoft News Dataset)
+
 - **News Articles**: 51,282+ articles with metadata
 - **User Interactions**: 50,000+ users with behavior data
 - **Categories**: news, sports, entertainment, finance, lifestyle, etc.
 - **Features**: Title, Abstract, Category, Subcategory, Entities
 
 ### Data Processing Pipeline
+
 1. **News Data Cleaning**: Remove articles without title/abstract
 2. **Behavior Parsing**: Extract user click histories and impressions
 3. **Interaction Matrix**: Create user-item interaction matrix
@@ -114,18 +123,21 @@ Smart-News-Recommendation-System/
 ### Web Interface Modes
 
 #### 1. Browse by Keyword 🔍
+
 - Enter keywords like "Sports", "Health", "Finance"
 - Get content-based recommendations
 - View AI-generated summaries
 - Export results as PDF/CSV
 
 #### 2. Personalized Recommendations 👤
+
 - **User-Based Tab**: Collaborative filtering recommendations
 - **Hybrid Tab**: Combined collaborative + content-based
 - **Keyword + Hybrid Tab**: Keyword-guided personalized recommendations
 - **Daily Trends Tab**: Most popular articles
 
 ### Sample User IDs for Testing
+
 - `U13740` - Sports and entertainment enthusiast
 - `U91836` - News and business focused
 - `U73700` - Health and lifestyle interested
@@ -145,6 +157,7 @@ The `mind-ds.ipynb` notebook contains:
 7. **Visualization and Analysis**
 
 ### Key Findings
+
 - Best hybrid parameter: α = 0.0 (collaborative filtering dominant)
 - SVD with 100 latent factors achieves good performance
 - Content-based filtering works well for cold-start scenarios
@@ -153,16 +166,18 @@ The `mind-ds.ipynb` notebook contains:
 ## 📈 Performance Metrics
 
 ### Evaluation Results
-- **Collaborative Filtering**: 
+
+- **Collaborative Filtering**:
   - Precision: 1.0, Recall: 0.090, F1: 0.166
-- **Content-Based**: 
+- **Content-Based**:
   - Precision: 1.0, Recall: 0.002, F1: 0.004
-- **Hybrid (α=0.0)**: 
+- **Hybrid (α=0.0)**:
   - Precision: 1.0, Recall: 0.090, F1: 0.166
 
 ## 🔧 Technical Implementation
 
 ### Algorithms Used
+
 1. **TF-IDF Vectorization**: For content similarity
 2. **Cosine Similarity**: Content-based recommendations
 3. **Singular Value Decomposition (SVD)**: Collaborative filtering
@@ -170,6 +185,7 @@ The `mind-ds.ipynb` notebook contains:
 5. **Hybrid Scoring**: Weighted combination of methods
 
 ### Libraries & Technologies
+
 - **Frontend**: Streamlit
 - **ML/Data**: pandas, numpy, scikit-learn, scipy
 - **NLP**: transformers, nltk
@@ -194,6 +210,7 @@ The `mind-ds.ipynb` notebook contains:
 4. **Path Errors**: Ensure data files are in correct archive/ location
 
 ### Performance Tips
+
 - First run takes 2-3 minutes to load and process data
 - Subsequent runs are faster due to model caching
 - Use smaller top_n values for faster response
@@ -201,11 +218,13 @@ The `mind-ds.ipynb` notebook contains:
 ## 📝 Development Notes
 
 ### Model Training Time
+
 - TF-IDF fitting: ~30 seconds
 - SVD training: ~10 seconds
 - Initial data loading: ~2 minutes
 
 ### Memory Usage
+
 - Peak memory: ~4-6GB during initial processing
 - Runtime memory: ~2-3GB
 
