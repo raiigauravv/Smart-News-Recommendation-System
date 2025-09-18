@@ -15,14 +15,16 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Build & push image to ACR
-        uses: azure/acr-build@v1
-        with:
-          service_principal: ${{ secrets.AZURE_CREDENTIALS }}
-          registry: ${{ secrets.AZURE_ACR_NAME }}
-          repository: smart-news-api
-          image: latest
-          dockerfile: server/Dockerfile
-          folder: .
+        run: |
+          # Login to ACR
+          az acr login --name ${{ secrets.AZURE_ACR_NAME }}
+          
+          # Build and push image
+          az acr build \
+            --registry ${{ secrets.AZURE_ACR_NAME }} \
+            --image smart-news-api:latest \
+            --file server/Dockerfile \
+            .
 
       - name: Point Web App to ACR image
         run: |
