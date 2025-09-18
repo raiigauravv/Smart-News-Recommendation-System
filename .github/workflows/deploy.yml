@@ -22,7 +22,7 @@ jobs:
           repository: smart-news-api
           image: latest
           dockerfile: server/Dockerfile
-          context: .
+          folder: .
 
       - name: Point Web App to ACR image
         run: |
