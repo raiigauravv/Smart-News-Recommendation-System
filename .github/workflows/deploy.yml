@@ -19,12 +19,11 @@ jobs:
           # Login to ACR
           az acr login --name ${{ secrets.AZURE_ACR_NAME }}
           
-          # Build and push image
-          az acr build \
-            --registry ${{ secrets.AZURE_ACR_NAME }} \
-            --image smart-news-api:latest \
-            --file server/Dockerfile \
-            .
+          # Build Docker image locally
+          docker build -t ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/smart-news-api:latest -f server/Dockerfile .
+          
+          # Push image to ACR
+          docker push ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/smart-news-api:latest
 
       - name: Point Web App to ACR image
         run: |
