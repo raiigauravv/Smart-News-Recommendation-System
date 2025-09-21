@@ -1,0 +1,32 @@
+# Smart News Recommendation System - Requirements
+
+# Data processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Machine learning
+scikit-learn>=1.3.0
+scipy>=1.10.0
+
+# Natural language processing
+nltk>=3.8.0
+transformers>=4.30.0
+
+# Environment management
+python-dotenv>=1.0.0
+
+# PDF generation (optional)
+reportlab>=4.0.0
+
+# Additional utilities
+urllib3>=2.0.0
+requests>=2.31.0
+tqdm>=4.65.0
+
+# For BERT4Rec (optional)
+torch>=2.0.0
+datasets>=2.14.0
+
+# Data visualization (for notebook)
+matplotlib>=3.7.0
+seaborn>=0.12.0

@@ -1,0 +1,19 @@
+services:
+  api:
+    build: ./server
+    ports: ["8000:8000"]
+    volumes:
+      - ./server/app:/app/app
+      - ./utils:/app/utils
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["bash","/app/uvicorn.sh"]
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports: ["5173:5173"]
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on: [api]

@@ -1,0 +1,124 @@
+# Smart News Recommendation System - .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Dataset files (large files)
+dataset/
+MINDsmall_train/
+*.tsv
+*.txt.gz
+*.zip
+
+# Logs
+*.log
+logs/
+server.log
+
+# Temporary files
+temp/
+tmp/
+test_*
+*.tmp
+*.temp
+
+# PDF exports (generated files)
+*.pdf
+
+# Node.js / React
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# React build
+/build
+/dist
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# MacOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Large model files
+*.bin
+*.h5
+*.model
+*.pkl
+*.pickle
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Editor temp files
+*~
+.#*
+\#*#
+.*.swp
+.*.swo
