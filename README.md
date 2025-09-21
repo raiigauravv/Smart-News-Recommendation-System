@@ -28,24 +28,71 @@ A modern, intelligent news recommendation system that provides personalized news
 - Professional error handling and validation
 - Modular architecture for easy extension
 
-## 🏗️ Architecture
+## 🏗️ System Architecture
 
-```
-Smart News Recommendation System
-├── Backend (FastAPI)
-│   ├── API Endpoints (/health, /trending, /recommend, /search, /export/pdf)
-│   ├── Recommendation Engines (4 algorithms)
-│   ├── Data Processing (MIND dataset)
-│   └── PDF Generation (ReportLab)
-├── Frontend (React + TypeScript)
-│   ├── Modern UI Components
-│   ├── API Integration
-│   ├── Responsive Design
-│   └── Real-time Updates
-└── Data Layer
-    ├── MIND Dataset (Microsoft Intelligent News Dataset)
-    ├── User Behavior Tracking
-    └── Content Embeddings
+```mermaid
+flowchart TB
+    subgraph Client["Client Layer"]
+        Web["Web Browser<br/>React SPA"]
+        Mobile["Mobile App<br/>Future"]
+        APIClient["API Clients<br/>Third Party"]
+    end
+    
+    subgraph CDN["CDN & Static Hosting"]
+        Vite["Vite Dev Server<br/>localhost:5173"]
+        Azure["Azure Static Web Apps<br/>Production CDN"]
+    end
+    
+    subgraph Gateway["API Gateway"]
+        FastAPI["FastAPI Server<br/>localhost:8000"]
+        CORS["CORS Middleware<br/>Cross-Origin Support"]
+    end
+    
+    subgraph AppLayer["Application Layer"]
+        subgraph CoreServices["Core Services"]
+            RecEngine["Recommendation Engine<br/>4 ML Algorithms"]
+            SearchSvc["Search Service<br/>Keyword + Category"]
+            PDFSvc["PDF Generation<br/>ReportLab"]
+            HealthSvc["Health Check<br/>System Status"]
+        end
+        
+        subgraph BusinessLogic["Business Logic"]
+            Adapters["Service Adapters<br/>Data Processing"]
+            Schemas["Pydantic Schemas<br/>Validation"]
+            Settings["Configuration<br/>Environment"]
+        end
+    end
+    
+    subgraph DataLayer["Data Layer"]
+        MIND["MIND Dataset<br/>News + Behaviors"]
+        NewsData["news.tsv<br/>51k+ Articles"]
+        BehaviorData["behaviors.tsv<br/>User Interactions"]
+        Embeddings["Entity/Relation<br/>Embeddings.vec"]
+        TempStorage["Temporary Storage<br/>PDFs + Cache"]
+    end
+    
+    Web --> Vite
+    Mobile --> Azure
+    APIClient --> FastAPI
+    Vite --> FastAPI
+    Azure --> FastAPI
+    FastAPI --> CORS
+    CORS --> RecEngine
+    CORS --> SearchSvc
+    CORS --> PDFSvc
+    CORS --> HealthSvc
+    
+    RecEngine --> Adapters
+    SearchSvc --> Adapters
+    PDFSvc --> Adapters
+    Adapters --> Schemas
+    Adapters --> Settings
+    Adapters --> MIND
+    
+    MIND --> NewsData
+    MIND --> BehaviorData
+    MIND --> Embeddings
+    PDFSvc --> TempStorage
 ```
 
 ## 📋 Prerequisites
